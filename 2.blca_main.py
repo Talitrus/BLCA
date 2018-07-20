@@ -271,7 +271,7 @@ print ">  > Read in blast output!"
 #print qtosdic.values()
 os.system("rm -f "+args.outfile)
 outout=open(args.outfile,'aw')
-levels=["superkingdom","phylum","class","order","family","genus","species"]
+levels=["superkingdom","kingdom","phylum","class","order","family","genus","species"]
 for seqn in fsadic.keys():
 # for k1,v1 in qtosdic.items():
 	k1=seqn
