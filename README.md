@@ -5,23 +5,29 @@ Bayesian LCA-based Taxonomic Classification Method (BLCA) is a Bayesian-based me
 We implemented the above algorithm as a simple python script here.
 
 ## Update
-* **May 11 2017 update** to be compatiable for the latest blastn v2.5 and added a new parameter -j to limit the accepted hits number to 50. After another round of testing, we've decided to change the default value of coverage and identify filter to 0.80 and 90 respectively.
+* **Sep 16 2019** Minor update of 2.blca_main.py to fix minus strand range from Blastn output (credit to [Carter Hoffman](mailto:hoffmanc@ohsu.edu)).
+* **Jul 8 2019** Minor update of 2.blca_main.py to fix clustalo's compatibility issue with blast 2.9.0.
+* **Jun 3 2019** Minor update of 2.blca_main.py to fix the hidden 100% confidence score bug.
+* **May 9 2019** Minor update to 1.subset_db_gg.py to include a new function to extract only sequences with full taxonomy information.
+* **Feb 26 2019 update** One utility script (generate_abundance_table.py) for merging multiple BLCA output is available in the utils folder.
+* **Feb 21 2019 update** The entire package has been updated to python 3.
+* **Nov 15 2018 update** Thanks to Kristjan's contribution, now we incorporated the use of clustalo as alignment software. Also, now BLCA main program is based on **python 3**.
+* **May 11 2017 update** to be compatible for the latest blastn v2.5 and added a new parameter -j to limit the accepted hits number to 50. After another round of testing, we've decided to change the default value of coverage and identify filter to 0.80 and 90 respectively.
 
 ## Important Note -- Please do read
-* BLCA currently is only compatiable with **blast 2.5.0+**, please make sure you have blast 2.5.0 or above. 
-* Read ID and Reference genome ID length should be both not more than **32** due to limited ID space in muscle output. 
+* BLCA has migrated to **Python 3**. If you'd like to use python2.7, please install from release (https://github.com/qunfengdong/BLCA/releases).
+* BLCA currently is compatible with **blast 2.9.0+**, please make sure you have the latest blast: version 2.9.0 or above. 
 * There should **NOT** be any "|" (pipe) present in the sequence ID of input fasta, database fasta and taxonomy files.
 
 ## Prerequisities
-* Python 2.7
+* Python 3
 * Linux
 * Biopython
 
-NOTE：if your system default python version is 3, you have to change the shebang line of every script from ```#!/usr/bin/env python``` to ```#!/usr/bin/env <python2.7 executable>```.
-
 ### **The following programs should be in your PATH:**
 
-* BLAST binary (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.5.0/)
+* BLAST binary (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.9.0/)
+* clustalo (http://www.clustal.org/omega/)
 * MUSCLE (http://www.drive5.com/muscle/downloads.htm)
 
 ## Citation
@@ -31,7 +37,7 @@ NOTE：if your system default python version is 3, you have to change the sheban
 ## Install
 To check out the source code, go to https://github.com/qunfengdong/BLCA. To obtain the scripts and example fasta files, do the following:
 
-```shell
+```
 $ git clone https://github.com/qunfengdong/BLCA.git
 ```
 
@@ -39,7 +45,7 @@ After the github repository is cloned, you will find a folder named BLCA. All th
 
 ## Quick start
 
-We do not include a pre-compiled database with this release, so the first step is to build a taxonomy database from the NCBI 16S microbial database. We achieve this by using script _1.subset_db_acc.py_ (or 1.subset_db_gg.py). After the database is built and stored on your local machine, you will supply the loction of the taxonomy output file (16SMicrobial.taxID.taxonomy) from the last step along with your input fasta file (test.fasta) to _2.blca_main.py_, then you will get a blca output as test.fasta.blca.out.
+We do not include a pre-compiled database with this release, so the first step is to build a taxonomy database from the NCBI 16S microbial database. We achieve this by using script _1.subset_db_acc.py_ (or 1.subset_db_gg.py). After the database is built and stored on your local machine, you will supply the location of the taxonomy output file (16SMicrobial.taxID.taxonomy) from the last step along with your input fasta file (test.fasta) to _2.blca_main.py_, then you will get a blca output as test.fasta.blca.out.
 
 ## Getting started
 
@@ -52,29 +58,32 @@ More options available:
 ```
 $ python 1.subset_db_acc.py -h
 
-<< Bayesian-based LCA taxonomic classification method >>
+usage: 1.subset_db_acc.py [--dir DIR] [-d DATABASE] [--taxdmp TAXDMP]
+                          [--taxdb TAXDB] [-h]
+
+ << Bayesian-based LCA taxonomic classification method >>
 
    Please make sure the following softwares are in your PATH:
-	1.muscle (http://www.drive5.com/muscle/downloads.htm), muscle should be the program's name.
-	2.ncbi-blast suite (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
-	3.Biopython is installed locally.
+		 1.muscle (http://www.drive5.com/muscle/downloads.htm), muscle should be the program's name.
+		 2.ncbi-blast suite (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
+		 3.clustalo (http://www.clustal.org/omega/), clustalo should be the program's name.
+		 4.Biopython should be installed locally.
 
-   This is the utility script to format 16S Microbial Database from NCBI before running the BLCA taxonomy profiling. This could be used for other subsets of NCBI formatted database for blast too.
+optional arguments:
+  --dir DIR             The local directory name where you want to store the formatted database. Default: db
+  -d DATABASE, --database DATABASE
+                        The database link that you want to download from and format. Default: ftp://ftp.ncbi.nlm.nih.gov/blast/db/16SMicrobial.tar.gz
+  --taxdmp TAXDMP       The taxonomy database dmp link from NCBI. Default: ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip
+  --taxdb TAXDB         The taxonomy database db link from NCBI. Default: ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz
+  -h, --help            show this help message and exit
 
-Usage: python 1.subset_db_acc.py
-
-Arguments:
- - Optional:
-	-d		The database link that you want to download from and format. Default: ftp://ftp.ncbi.nlm.nih.gov/blast/db/16SMicrobial.tar.gz.
-	-t		The taxonomy database link from NCBI. Default: ftp://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip.
-	-u		The taxdb from NCBI. Default: ftp://ftp.ncbi.nlm.nih.gov/blast/db/taxdb.tar.gz 
- - Other:
-	-h		Show program usage and quit
+No warrenty comes with this script. Author: hlin2@luc.edu. 
+Any suggestions or bugs report are welcomed.
 ```
 During the process of setting up the database, NCBI's 16SMicrobial.tar.gz file, and taxdmp.zip will be downloaded into a default folder: ./db/, and uncompressed. 16SMicrobial.ACC.taxonomy under the ./db directory is the taxonomy file should be supplied to the 2.blca_main.py as the database. 
 
 ### Alternative Step 1
-* To format Greengenes database, first you have to download the Greengenes fasta and taxonomy files from http://greengenes.secondgenome.com/downloads/database/13_5. The files you need are gg_13_5.fasta.gz and gg_13_5_taxonomy.txt.gz. After you make sure you download the targeted two files under BLCA folder, please run:
+* To format GreenGenes database, first you have to download the Greengenes fasta and taxonomy files from https://greengenes.secondgenome.com/?prefix=downloads/greengenes_database/gg_13_5/. The files you need are gg_13_5.fasta.gz and gg_13_5_taxonomy.txt.gz. After you make sure you download the targeted two files under BLCA folder, please run:
 ```
 $ python 1.subset_db_gg.py
 ```
@@ -83,31 +92,49 @@ This script will unzip the downloaded files and create a new folder called "gg" 
 More options available:
 ```
 $ python 1.subset_db_gg.py -h
+usage: 1.subset_db_gg.py [--dir DIR] [--ggfasta GGFASTA] [--ggtax GGTAX] [-t]
+                         [-h]
 
-<< Bayesian-based LCA taxonomic classification method >>
+ << Bayesian-based LCA taxonomic classification method >>
 
    Please make sure the following softwares are in your PATH:
-	1.muscle (http://www.drive5.com/muscle/downloads.htm), muscle should be the program's name.
-	2.ncbi-blast suite (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
-	3.Biopython is installed locally.
+      1.muscle (http://www.drive5.com/muscle/downloads.htm), muscle should be the program's name.
+      2.ncbi-blast suite (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
+      3.clustalo (http://www.clustal.org/omega/), clustalo should be the program's name.
+      4.Biopython should be installed locally.
 
-   This is the utility script to format Greengene Database before running the BLCA taxonomy profiling.
+      This is the utility script to format Greengene Database before running the BLCA taxonomy profiling.
+      >> Please first download the Greengenes fasta and taxonomy files from https://greengenes.secondgenome.com/?prefix=downloads/greengenes_database/gg_13_5/.
 
-Usage: python 1.subset_db_gg.py
+optional arguments:
+  --dir DIR          The local directory name where you want to store the formatted database. Default: gg
+  --ggfasta GGFASTA  The GreenGene database fasta file. Default: gg_13_5.fasta.gz
+  --ggtax GGTAX      The GreenGene database taxonomy file. Default: gg_13_5_taxonomy.txt.gz
+  -t, --fulltax      Extract a subset of GreenGene with only reads with full taxonomy information. This could take a while.
+  -h, --help         show this help message and exit
 
-Arguments:
- - Optional:
-	-d		The database file that you want to format. Default: gg_13_5.fasta.gz.
-	-t		The taxonomy database link from Greengenes. Default: gg_13_5_taxonomy.txt.gz. 
- - Other:
-	-h		Show program usage and quit
+No warrenty comes with this script. Author: hlin2@luc.edu. 
+Any suggestions or bugs report are welcomed.
 ```
+### SILVA LSU database (Credit to Dr. Daniel Swan)
+
+Thanks to Dr. Swan's personal effort to build a BLCA-compatible blastn-database and taxonomy file for SILVA LSU database. 
+
+* Download the pre-compiled database at this [link](https://drive.google.com/drive/folders/1t0TzC08y7_LyglsdihaXu27oWr7PiKLe).
+
+* After you've downloaded the SILVA LSU fasta and taxonomy file, you will need to format the fasta file as the following:
+
+``` 
+$ makeblastdb -in SILVA_132_LSURef_tax_silva_BLCAparsed.fasta -dbtype nucl -parse_seqids -out SILVA_132_LSURef_tax_silva_BLCAparsed.fasta
+```
+* Then you can follow the instructions in the [Training your own database](#training-your-own-database) section.
+
 ### Split input fasta (Optional)
 * If you have a big fasta file, and you want to run BLCA in "parallel", you can use [this python package](https://pypi.python.org/pypi/pyfasta/#command-line-interface) to split fasta sequences into multiple parts, then run BLCA on each individual part.
 
 ### Step 2 
 * Run your analysis with the compiled database. Please run:
-```
+``` 
 $ python 2.blca_main.py -i test.fasta
 ```
 If you are running your analysis somewhere else other than in the BLCA directory, please do the following:
@@ -123,37 +150,54 @@ More options are the following:
 ```
 $ python 2.blca_main.py -h
 
-<< Bayesian-based LCA taxonomic classification method >>
+usage: 2.blca_main.py -i FSA [-x] [-n NPER] [-j NSUB] [-d TOPPER] [-e ESET]
+                      [-b BSET] [-c CVRSET] [--iset ISET] [-a ALIGN]
+                      [-m MATCH] [-f MISMATCH] [-g NGAP] [-r TAX] [-q DB]
+                      [-t GAP] [-o OUTFILE] [-p PROC] [-h]
+
+ << Bayesian-based LCA taxonomic classification method >>
 
    Please make sure the following softwares are in your PATH:
-	1.muscle (http://www.drive5.com/muscle/downloads.htm), muscle should be the program's name.
-	2.ncbi-blast suite (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
-	3.Biopython should be installed locally.
+    1.muscle (http://www.drive5.com/muscle/downloads.htm), muscle should be the program's name.
+    2.ncbi-blast suite (ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/)
+    3.clustalo (http://www.clustal.org/omega/), clustalo should be the program's name.
+    4.Biopython should be installed locally.
 
-Usage: python 2.blca_main.py -i <fasta file> [option]
+required arguments:
+  -i FSA, --fsa FSA     Input fasta file
 
- 
-Arguments:
- - Required:
-	-i		Input fasta file.
- - Taxonomy Profiling Options [filtering of hits]:
-	-n		Number of times to bootstrap. Default: 100
-	-j		Maximum number of subjects to include for each query reads. Default: 50
-	-d		Proportion of hits to include from top hit. Default: 0.1 [0-1]
-	-e		Minimum evalue to include for blastn. Default: 0.1
-	-a		Minimum bitscore to include for blastn hits. Default: 100
-	-c		Minimum coverage to include. Default: 0.85 [0-1]
-	-b		Minimum identity score to include. Default: 90 [0-100]
-	-r		Reference Taxonomy file for the Database. Default: db/16SMicrobial.ACC.taxonomy
-	-q		Refernece blast database. Default: db/16SMicrobial
-	-o		Output file name. Default: <fasta>.blca.out
- - Alignment Options:
-	-m		Alignment match score. Default: 1
-	-f		Alignment mismatch penalty. Default: -2.5
-	-g		Alignment gap penalty. Default: -2
- - Other:
-	-t		Extra number of nucleotides to include at the beginning and end of the hits. Default: 10
-	-h		Show program usage and quit
+taxonomy profiling options [filtering of hits]:
+  -x, --skipblast       skip blastn. Default: blastn is not skipped
+  -n NPER, --nper NPER  number of times to bootstrap. Default: 100
+  -j NSUB, --nsub NSUB  maximum number of subjects to include for each query reads. Default: 50
+  -d TOPPER, --topper TOPPER
+                        proportion of hits to include from top hit. Default: 0.1 [0-1]
+  -e ESET, --eset ESET  minimum evalue to include for blastn. Default: 0.1
+  -b BSET, --bset BSET  minimum bitscore to include for blastn hits. Default: 100
+  -c CVRSET, --cvrset CVRSET
+                        minimum coverage to include. Default: 0.85 [0-1]
+  --iset ISET           minimum identity score to include. Default: 90 [0-100]
+
+alignment control arguments:
+  -a ALIGN, --align ALIGN
+                        alignment tool: clustal omega or muscle. Default: clustalo
+  -m MATCH, --match MATCH
+                        alignment match score. Default: 1
+  -f MISMATCH, --mismatch MISMATCH
+                        alignment mismatch penalty. Default: -2.5
+  -g NGAP, --ngap NGAP  alignment gap penalty. Default: -2
+
+other arguments:
+  -r TAX, --tax TAX     reference taxonomy file for the Database. Default: db/16SMicrobial.ACC.taxonomy
+  -q DB, --db DB        refernece blast database. Default: db/16SMicrobial
+  -t GAP, --gap GAP     extra number of nucleotides to include at the beginning and end of the hits. Default: 10
+  -o OUTFILE, --outfile OUTFILE
+                        output file name. Default: <fasta>.blca.out
+  -p PROC, --proc PROC  how many processors are used in blastn step. Default: 2 processors
+  -h, --help            show this help message and exit
+
+No warrenty comes with this script. Author: hlin2@luc.edu. 
+Any suggestions or bugs report are welcomed.
 ```
 
 ## Output
@@ -193,12 +237,12 @@ NR_027573.1     species:Intestinibacter bartlettii;genus:Intestinibacter;family:
 ```
 
 3. Run 2.blca_main.py with the formatted database and taxonomy file.
-```
+```bash
 $ python 2.blca_main.py -i test.fasta -r /location/to/your/database/YourDatabase.taxonomy -q /location/to/your/database/YourDatabase
 ```
 
 ## Version
-* Version 2.1 An alternative public release
+* Version 2.2 An alternative public release
 
 ## Authors
 * Dr. Xiang Gao, theoretical conception and algorithm development
@@ -215,5 +259,6 @@ GNU
 
 ## Acknowledgements
 * BLAST program: Camacho C., Coulouris G., Avagyan V., Ma N., Papadopoulos J., Bealer K., & Madden T.L. (2008) "BLAST+: architecture and applications." BMC Bioinformatics 10:421.
+* Clustal Omega: Sievers, Fabian, Andreas Wilm, David Dineen, Toby J. Gibson, Kevin Karplus, Weizhong Li, Rodrigo Lopez et al. "Fast, scalable generation of high‐quality protein multiple sequence alignments using Clustal Omega." Molecular systems biology 7, no. 1 (2011): 539.
 * MUSCLE: Edgar, R.C. (2004) MUSCLE: multiple sequence alignment with high accuracy and high throughput.Nucleic Acids Res. 32(5):1792-1797. doi:10.1093/nar/gkh340
 * Biopython: Cock PA, Antao T, Chang JT, Bradman BA, Cox CJ, Dalke A, Friedberg I, Hamelryck T, Kauff F, Wilczynski B and de Hoon MJL (2009) Biopython: freely available Python tools for computational molecular biology and bioinformatics. Bioinformatics, 25, 1422-1423
